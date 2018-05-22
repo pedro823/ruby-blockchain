@@ -81,11 +81,11 @@ class Block
   end
 
   def inspect
-    "#<Block hash_10=#{hash[-10..-1]} nonce=#{@nonce} prev_hash=#{@previous_hash[0..10]}>"
+    "#<Block hash_10=#{hash[-10..-1]} nonce=#{@nonce} prev_hash=#{@previous_hash[-10..-1]}>"
   end
 
   def to_ary
-    ["#<Block hash_10=#{hash[-10..-1]} nonce=#{@nonce} prev_hash=#{@previous_hash[0..10]}>"]
+    ["#<Block hash_10=#{hash[-10..-1]} nonce=#{@nonce} prev_hash=#{@previous_hash[-10..-1]}>"]
   end
 
   def to_s
