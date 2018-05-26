@@ -2,7 +2,7 @@ require './block'
 require './errors'
 
 class Blockchain
-  attr_reader :chain
+  attr_accessor :chain
 
   def initialize
     # Initializes a blockchain.
@@ -51,9 +51,9 @@ class Blockchain
   end
 
   def add_block(block)
-    other.previous_hash = latest_block.hash
-    other.mine
-    @chain << other
+    block.previous_hash = latest_block.hash
+    block.mine
+    @chain << block
   end
 
   def add_transaction(transaction)

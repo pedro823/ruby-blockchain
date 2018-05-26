@@ -6,3 +6,9 @@ class BlockchainError < StandardError
   end
 
 end
+
+class DatabaseError < BlockchainError
+  def initialize(msg)
+    super(msg, type: 'database')
+  end
+end

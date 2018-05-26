@@ -4,7 +4,7 @@ require './transaction'
 
 class Block
   attr_accessor :hash, :previous_hash, :nonce
-  attr_reader :data, :timestamp, :index, :difficulty, :transactions
+  attr_reader :timestamp, :difficulty, :transactions
 
   # CLASS METHODS
 
@@ -20,8 +20,12 @@ class Block
 
   # INSTANCE METHODS
 
-  def initialize(previous_hash, transactions, difficulty)
-    @timestamp = Time.now
+  def initialize(previous_hash,
+                 transactions,
+                 difficulty,
+                 timestamp=Time.now,
+                 nonce=0)
+    @timestamp = timestamp
     @previous_hash = previous_hash
     if transactions.length > 100
       raise BlockchainError(
@@ -30,7 +34,7 @@ class Block
     end
     @transactions = Block.filter_invalid(transactions)
     @difficulty = difficulty
-    @nonce = 0
+    @nonce = nonce
   end
 
   def hash
@@ -85,11 +89,11 @@ class Block
   end
 
   def to_ary
-    ["#<Block hash_10=#{hash[-10..-1]} nonce=#{@nonce} prev_hash=#{@previous_hash[-10..-1]}>"]
+    ["Block nonce=#{@nonce} hash=#{hash} timestamp=#{@timestamp}"]
   end
 
   def to_s
-    "Block index=#{@index} nonce=#{@nonce} hash=#{hash} timestamp=#{@timestamp}"
+    "Block nonce=#{@nonce} hash=#{hash} timestamp=#{@timestamp}"
   end
 
 end
@@ -121,4 +125,12 @@ if __FILE__ == $0
     b.mine
     puts b.valid?
   end
+  # Tampering with the transaction (requires attr_accessor in transaction)
+  # a = Transaction.new(1, 2, 50)
+  # c = Block.new(b.hash, [a], 3)
+  # puts c.valid?
+  # c.mine
+  # puts c.valid?
+  # a.to = 4
+  # puts c.valid?
 end
