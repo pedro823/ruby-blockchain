@@ -1,27 +1,28 @@
-class Transaction
-  attr_reader :from, :to, :amount
+require "./errors"
 
-  def self.serialize(tr)
+class Transaction
+  getter :from, :to, :amount
+
+  def self.serialize(tr : Transaction)
     "tr:#{tr.from}@@#{tr.to}@@#{tr.amount}"
   end
 
-  def self.deserialize(str)
-    if str.start_with?("tr:")
+  def self.deserialize(str : String)
+    if str.starts_with?("tr:")
       str = str[3..-1]
     else
       raise BlockchainError.new("Deserialize: not a transaction",
-                                type: "serialization")
+                                t: "serialization")
     end
     from, to, amount = str.split("@@")
     amount = amount.to_f
     return Transaction.new(from, to, amount)
   end
 
-  def initialize(from, to, amount)
-    from, to = from.to_s, to.to_s
-    if from.include?("|") or to.include?("|")
+  def initialize(from : String, to : String, amount : Float64)
+    if from.includes?("|") || to.includes?("|")
       raise BlockchainError.new("Cannot have character '|' in wallet address",
-                                type: "serialization")
+                                t: "serialization")
     end
     @from = from
     @to = to
@@ -47,18 +48,18 @@ class Transaction
 end
 
 class DataTransaction
-  attr_reader :from, :data
+  getter :from, :data
 
-  def self.serialize(tr)
+  def self.serialize(tr : DataTransaction)
     "dt:#{tr.from}@@#{tr.data};"
   end
 
-  def self.deserialize(str)
-    if str.start_with?("dt:")
+  def self.deserialize(str : String)
+    if str.starts_with?("dt:")
       str = str[3..-1]
     else
       raise BlockchainError.new("Deserialize: not a transaction",
-                                type: "serialization")
+                                t: "serialization")
     end
     l = str.split("@@")
     from = l[0]
@@ -66,11 +67,10 @@ class DataTransaction
     return DataTransaction.new(from, data)
   end
 
-  def initialize(from, data)
-    from = from.to_s
-    if from.include?("|")
+  def initialize(from : String, data : String)
+    if from.includes?("|")
       raise BlockchainError.new("Cannot have character '|' in wallet address",
-                                type: "serialization")
+                                t: "serialization")
     end
     @from = from
     @data = data
@@ -95,16 +95,15 @@ end
 
 # Unit testing
 
-if __FILE__ == $0
+file_name = Process.executable_path
+if !file_name.nil? && file_name.includes?("transaction")
   a = DataTransaction.new("from", "@try@@@me@@baby")
   print a.serialize, "\n"
   b = DataTransaction.deserialize(a.serialize)
   print a.data, "\n"
   print b.data, "\n"
-  c = DataTransaction.new(123, "@@")
+  c = DataTransaction.new("123", "@@")
   d = DataTransaction.deserialize(c.serialize)
   print c.data, "\n"
   print d.data, "\n"
-  print c.from.class, "\n"
-  print d.from.class, "\n"
 end
