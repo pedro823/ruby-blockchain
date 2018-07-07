@@ -1,3 +1,5 @@
+require './errors.rb'
+
 class Transaction
   attr_reader :from, :to, :amount
 
