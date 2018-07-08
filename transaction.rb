@@ -3,6 +3,7 @@ require './errors.rb'
 class Transaction
   attr_reader :from, :to, :amount
 
+  # Class methods
   def self.serialize(tr)
     "tr:#{tr.from}@@#{tr.to}@@#{tr.amount}"
   end
@@ -19,15 +20,19 @@ class Transaction
     return Transaction.new(from, to, amount)
   end
 
+  # instance methods
   def initialize(from, to, amount)
     from, to = from.to_s, to.to_s
-    if from.include?('|') or to.include?('|')
-      raise BlockchainError.new("Cannot have character '|' in wallet address",
+    if from.include?('@') or to.include?('@')
+      raise BlockchainError.new("Cannot have character '@' in wallet address",
                                 type: "serialization")
+    end
+    if from == to
+      raise BlockchainError.new("Cannot send transaction to the same wallet address.")
     end
     @from = from
     @to = to
-    @amount = amount
+    @amount = amount.to_f
   end
 
   def valid?
@@ -70,8 +75,8 @@ class DataTransaction
 
   def initialize(from, data)
     from = from.to_s
-    if from.include?('|')
-      raise BlockchainError.new("Cannot have character '|' in wallet address",
+    if from.include?('@')
+      raise BlockchainError.new("Cannot have character '@' in wallet address",
                                 type: "serialization")
     end
     @from = from

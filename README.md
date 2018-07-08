@@ -13,7 +13,7 @@ This project is currently in development. Current checklist:
 + ❌ Implement user interface
 + ❌ Create Wiki/how-to
 + ❌ Create Transaction validation
-+ ❌ Implement wallet generation
++ ✔️ Implement wallet generation
 + ❌ Optimize search-block efficiency
 + ❌ Create distributed peer-to-peer synchronization
 + ❌ Assure only the valid wallets can generate transactions from it

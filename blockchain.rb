@@ -4,12 +4,12 @@ require './errors'
 class Blockchain
   attr_accessor :chain
 
-  def initialize
+  def initialize(difficulty: 4, mine_reward: 100)
     # Initializes a blockchain.
     @chain = [create_genesis_block]
     @pending = []
-    @difficulty = 4
-    @mine_reward = 100
+    @difficulty = difficulty
+    @mine_reward = mine_reward
   end
 
   def create_genesis_block
@@ -25,12 +25,12 @@ class Blockchain
   def mine_block(miner_address)
     # Creates a block with the 100 latest transactions.
     @pending = Block.filter_invalid(@pending)
-    trxs = @pending[0..100] + [Transaction.new(nil, miner_address, @mine_reward)]
+    trxs = @pending[0...99] + [Transaction.new(nil, miner_address, @mine_reward)]
     b = Block.new(latest_block.hash, trxs, @difficulty)
     b.mine
     if b.valid?
       # Block mined. Ready to remove transactions from pending
-      @pending = @pending[99..-1] or []
+      @pending = @pending[99..-1] || []
       @chain << b
     end
   end
@@ -85,6 +85,10 @@ class Blockchain
     end
     return true
   end
+
+  def has_pending_transactions?
+    @pending.length > 0
+  end
 end
 
 # Unit testing
@@ -95,7 +99,7 @@ if __FILE__ == $0
   t = Transaction.new(1, 2, 10)
   b += t
   print b.chain, "\n"
-  b.mine_block(13)
+  b.mine_block('123')
   puts b.check_balance(1)
   print b.chain, "\n"
   puts b.valid?

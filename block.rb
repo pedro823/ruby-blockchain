@@ -28,7 +28,7 @@ class Block
     @timestamp = timestamp
     @previous_hash = previous_hash
     if transactions.length > 100
-      raise BlockchainError(
+      raise BlockchainError.new(
         "Cannot initialize Block with more than 100 transactions. (Got: #{transactions.length})"
       )
     end

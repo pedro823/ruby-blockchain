@@ -14,6 +14,7 @@ class Database
       Dir.mkdir('db/')
     end
     @db = GDBM.new('db/' + file_name)
+    @wallet_db = GDBM.new('db/wallets_' + file_name)
   end
 
   def clear
@@ -55,6 +56,24 @@ class Database
 
   def close
     @db.close
+    @wallet_db.close
+  end
+
+  # Wallet related
+  def wallet_exists?(wallet)
+    return !!@wallet_db[wallet]
+  end
+
+  def insert_wallet(wallet, serialized_information = '')
+    if wallet.empty?
+      raise BlockchainError.new('Wallet address cannot be empty')
+    end
+    @wallet_db[wallet] = serialized_information or wallet
+  end
+
+  def delete_wallet(wallet)
+    # Shouldn't be called regularly, just for debugging purposes
+    @wallet_db.delete(wallet)
   end
 
   private
@@ -143,5 +162,20 @@ if __FILE__ == $0
     puts block
     print block.transactions, "\n"
   end
+
+  puts "Wallet related"
+  puts db.wallet_exists?('random_wallet')
+  puts db.insert_wallet('random_wallet')
+  puts db.wallet_exists?('random_wallet')
+  puts db.insert_wallet('random_wallet', 'stuff')
+  db.delete_wallet('random_wallet')
+
+  begin
+    db.insert_wallet('')
+  rescue => e
+    puts e
+  end
+
+  db.close
 
 end
