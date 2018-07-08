@@ -22,7 +22,7 @@ class Wallet
       # Generating from chain
       unless exists_in_chain?(address)
         raise BlockchainError.new('cannot initialize wallet from fixed address' +
-                                  'without the address being in the blockchain.')
+                                  ' without the address being in the blockchain.')
       end
       @address = address
     end

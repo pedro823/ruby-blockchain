@@ -1,5 +1,6 @@
-require './block'
-require './errors'
+require './block.rb'
+require './errors.rb'
+require './wallet.rb'
 
 class Blockchain
   attr_accessor :chain
@@ -15,6 +16,17 @@ class Blockchain
   def create_genesis_block
     # Creates a first empty block.
     Block.new('0' * 64, [], 0)
+  end
+
+  def create_genesis_wallet(database)
+    require 'securerandom'
+    wallet_prefix = 'genesis_wallet_'
+    genesis_wallet_address = wallet_prefix + SecureRandom.base64(96 - wallet_prefix.length)
+    tr = Transaction.new(nil, genesis_wallet_address, 1e6 - @mine_reward)
+    @pending << tr
+    mine_block(genesis_wallet_address)
+    database.insert_wallet(genesis_wallet_address, '{ "info": "hello world!" }')
+    return Wallet.new(self, database, genesis_wallet_address)
   end
 
   def latest_block
@@ -89,10 +101,31 @@ class Blockchain
   def has_pending_transactions?
     @pending.length > 0
   end
+
+  def status(database)
+    puts '#--- Blockchain report ---#'
+    puts 'Blocks:'
+    @chain.each do |block|
+      puts ' ' * 4 + block.inspect
+    end
+    puts
+    puts 'Wallets inserted in the database:'
+    database.each_wallet do |key, wallet|
+      puts ' ' * 4 + 'address: ' + key + ' information: ' + wallet.inspect
+    end
+    puts 'Pending transactions:'
+    @pending.each do |tr|
+      puts tr
+    end
+    puts 'valid?'
+    puts ' ' * 4 + valid?.to_s
+    puts '#-------------------------#'
+  end
 end
 
 # Unit testing
 if __FILE__ == $0
+  require './database.rb'
   b = Blockchain.new
   print b.chain
   puts
@@ -103,4 +136,14 @@ if __FILE__ == $0
   puts b.check_balance(1)
   print b.chain, "\n"
   puts b.valid?
+  b.chain = b.chain.reverse
+  puts b.valid?
+  b.chain = b.chain.reverse
+
+  # genesis wallet
+  db = Database.new('test_blockchain.rb')
+  puts b.create_genesis_wallet(db)
+  b.status(db)
+  db.clear
+  db.close
 end

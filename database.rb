@@ -21,7 +21,9 @@ class Database
     # Clears database and starts fresh.
     close
     File.delete('db/' + @file_name)
+    File.delete('db/wallets_' + @file_name)
     @db = GDBM.new('db/' + @file_name)
+    @wallet_db = GDBM.new('db/wallets_' + @file_name)
   end
 
   def fetch_block(block_hash)
@@ -68,12 +70,20 @@ class Database
     if wallet.empty?
       raise BlockchainError.new('Wallet address cannot be empty')
     end
-    @wallet_db[wallet] = serialized_information or wallet
+    @wallet_db[wallet] = serialized_information || wallet
   end
 
   def delete_wallet(wallet)
     # Shouldn't be called regularly, just for debugging purposes
     @wallet_db.delete(wallet)
+  end
+
+  def each_wallet(&block)
+    @wallet_db.each_pair(&block)
+  end
+
+  def each_block(&block)
+    @db.each_pair(&block)
   end
 
   private
