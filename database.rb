@@ -46,6 +46,7 @@ class Database
     blockchain.chain.each_index do |index|
       insert_block(index, blockchain.chain[index])
     end
+    return nil
   end
 
   def fetch_blockchain
@@ -63,7 +64,7 @@ class Database
 
   # Wallet related
   def wallet_exists?(wallet)
-    return !!@wallet_db[wallet]
+    !!@wallet_db[wallet]
   end
 
   def insert_wallet(wallet, serialized_information = '')
